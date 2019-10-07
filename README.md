@@ -1,6 +1,9 @@
 # WLED - Domoticz Python Plugin
 Python plugin for Domoticz to add integration with [WLED](https://github.com/Aircoookie/WLED) project
 
+## BETA
+This is my first project in Python and my first GitHub repository. Expect errors, but feel free to try, and let me know what you think!
+
 ## Installation
 
 1. Clone repository into your domoticz plugins folder
@@ -21,4 +24,4 @@ Once plugin is started it will create appropriate domoticz devices. You will fin
 cd domoticz/plugins/wled
 git pull
 ```
-2. Restart domoticz
+2. Restart domoticz2

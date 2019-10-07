@@ -3,7 +3,7 @@
 # Author: Frustreermeneer
 #
 """
-<plugin key="WLED" name="WLED test" author="frustreermeneer" version="0.0.1" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/frustreermeneer/domoticz-wled-plugin">
+<plugin key="WLED" name="WLED" author="frustreermeneer" version="0.0.1" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/frustreermeneer/domoticz-wled-plugin">
     <description>
         <h2>WLED Plugin</h2><br/>
         <h3>Features</h3>
@@ -113,14 +113,14 @@ class BasePlugin:
             if( Command == "Set Level" ):
                 Domoticz.Log("set palette:"+str(Level) )
                 doWLEDRequest( "&FP="+str(int(Level/10)-1) )
-                UpdateDevice(1, Level, Level )
+                UpdateDevice(1, 1, Level )
     
-    # effect keuze
+        # effect keuze
 
         if( Unit == 2 ):
             if( Command == "Set Level" ):
                 doWLEDRequest( "&T=1&FX="+str(int(Level/10)-1) )
-                UpdateDevice(2, Level, Level )
+                UpdateDevice(2, 1, Level )
 
             if( Command == "Off" ):
                 doWLEDRequest( "&T=0" )
