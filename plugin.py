@@ -38,7 +38,7 @@ class BasePlugin:
     counter = 0
 
     def onStart(self):
-        Domoticz.Log("onStart called")
+#        Domoticz.Log("onStart called")
         self.counter = 0
         self.Color = {}
 
@@ -68,8 +68,8 @@ class BasePlugin:
 
     def onConnect(self, Connection, Status, Description):
         global ipaddress
-        Domoticz.Log("onConnect called")
-        Domoticz.Log("Name:"+Connection.Name)
+#        Domoticz.Log("onConnect called")
+#        Domoticz.Log("Name:"+Connection.Name)
  
         # er is een externe verbinding gemaakt
         # json request doen
@@ -86,7 +86,7 @@ class BasePlugin:
 
     def onMessage(self, Connection, Data):
         global jsonArray
-        Domoticz.Log("onMessage called: "+Connection.Name )
+#       Domoticz.Log("onMessage called: "+Connection.Name )
         
         # we krijgen antwoord terug op onze request
         # json update request afhandelen
@@ -99,19 +99,18 @@ class BasePlugin:
                 strData = Data["Data"].decode("utf-8", "ignore")
 
                 jsonArray = json.loads( str(strData) ) 
-                Domoticz.Log( "jsonArray:"+str(jsonArray) )
+#                Domoticz.Log( "jsonArray:"+str(jsonArray) )
 
                 if( len( jsonArray ) ):
                     UpdateEffectsInDomoticz()
                     UpdatePalettesInDomoticz()
 
     def onCommand(self, Unit, Command, Level, Color):
-        Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Command '" + str(Command) + "', Level: " + str(Level) + "', Color: " + str(Color) )
+#        Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Command '" + str(Command) + "', Level: " + str(Level) + "', Color: " + str(Color) )
 
         # palettes keuze
         if( Unit == 1 ):
             if( Command == "Set Level" ):
-                Domoticz.Log("set palette:"+str(Level) )
                 doWLEDRequest( "&FP="+str(int(Level/10)-1) )
                 UpdateDevice(1, 1, Level )
     
@@ -149,15 +148,9 @@ class BasePlugin:
                 UpdateDevice(3, 0, self.Level,self.Color)
                 doWLEDRequest( "/win&T=0&A="+str(int(self.Level*2.55)) )
 
-    def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):
-        Domoticz.Log("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)
-
-    def onDisconnect(self, Connection):
-        Domoticz.Log("onDisconnect called")
-
     def onHeartbeat(self):
         global updateInterval
-        Domoticz.Log("onHeartbeat called:" + str(self.counter) ) #+str(len(Devices[2].Options["LevelNames"]))+" - "+str(self.counter))
+#        Domoticz.Log("onHeartbeat called:" + str(self.counter) ) #+str(len(Devices[2].Options["LevelNames"]))+" - "+str(self.counter))
 
         self.counter = self.counter + 1
 
@@ -189,14 +182,6 @@ def onCommand(Unit, Command, Level, Hue):
     global _plugin
     _plugin.onCommand(Unit, Command, Level, Hue)
 
-def onNotification(Name, Subject, Text, Status, Priority, Sound, ImageFile):
-    global _plugin
-    _plugin.onNotification(Name, Subject, Text, Status, Priority, Sound, ImageFile)
-
-def onDisconnect(Connection):
-    global _plugin
-    _plugin.onDisconnect(Connection)
-
 def onHeartbeat():
     global _plugin
     _plugin.onHeartbeat()
@@ -221,7 +206,7 @@ def UpdateDevice(Unit, nValue, sValue, Color=""):
     if (Unit in Devices):
         if (Devices[Unit].nValue != nValue) or (Devices[Unit].sValue != sValue) or (Devices[Unit].Color != Color):
             Devices[Unit].Update(nValue=nValue, sValue=str(sValue), Color=Color)
-            Domoticz.Log("Update "+str(nValue)+":'"+str(sValue)+"' ("+Devices[Unit].Name+")")
+            #Domoticz.Log("Update "+str(nValue)+":'"+str(sValue)+"' ("+Devices[Unit].Name+")")
     return
 
 def UpdateEffectsInDomoticz():
@@ -245,7 +230,7 @@ def UpdateEffectsInDomoticz():
     sValue = Devices[2].sValue;
     Devices[2].Update(nValue = nValue, sValue = sValue, Options = dictOptions)
     
-    Domoticz.Log("updateEffectsInDomoticz done!")
+#    Domoticz.Log("updateEffectsInDomoticz done!")
 
 def UpdatePalettesInDomoticz():
     global jsonArray
@@ -268,7 +253,7 @@ def UpdatePalettesInDomoticz():
     sValue = Devices[1].sValue;
     Devices[1].Update(nValue = nValue, sValue = sValue, Options = dictOptions)
     
-    Domoticz.Log("updatePalettesInDomoticz done!")
+#    Domoticz.Log("updatePalettesInDomoticz done!")
 
 def getWLEDStatus():
     getWLEDStatusConn = Domoticz.Connection(Name="getWLEDStatusConn", Transport="TCP/IP", Protocol="HTTP", Address=ipaddress, Port="80" )
@@ -277,9 +262,9 @@ def getWLEDStatus():
 def doWLEDRequest( parameters ):
     global ipaddress
     url = "http://"+ipaddress+"/win"+parameters
-    Domoticz.Log( url )
+#    Domoticz.Log( url )
     resp = requests.get(url=url)
-    Domoticz.Log(str(resp.status_code))
-    Domoticz.Log(str(resp))
+#    Domoticz.Log(str(resp.status_code))
+#    Domoticz.Log(str(resp))
     
 
