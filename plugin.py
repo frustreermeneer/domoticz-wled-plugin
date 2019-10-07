@@ -1,9 +1,9 @@
-# WLED Plugin for Domoticz2
+# WLED Plugin for Domoticz
 #
 # Author: Frustreermeneer
 #
 """
-<plugin key="WLED" name="WLED test" author="frustreermeneer" version="0.0.1" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://www.google.com/">
+<plugin key="WLED" name="WLED test" author="frustreermeneer" version="0.0.1" wikilink="http://www.domoticz.com/wiki/plugins/plugin.html" externallink="https://github.com/frustreermeneer/domoticz-wled-plugin">
     <description>
         <h2>WLED Plugin</h2><br/>
         <h3>Features</h3>
