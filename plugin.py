@@ -20,7 +20,7 @@
         <h3>Configuration</h3>
     </description>
     <params>
-	<param field="Address" label="IP Address" width="200px" required="true" default=""/>
+	<param field="Address" label="IP Address" width="200px" required="true" default=""/> The (IP) address of your WLED webserver.
 	<!--param field="UpdateInterval" label="Update interval" width="200px" required="true" default="10"/--> 
     </params>
 </plugin>
