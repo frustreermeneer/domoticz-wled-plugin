@@ -25,3 +25,7 @@ cd domoticz/plugins/wled
 git pull
 ```
 2. Restart domoticz2
+
+## Screenshots
+
+![alt text](https://raw.githubusercontent.com/frustreermeneer/domoticz-wled-plugin/master/screenshot.jpg)
