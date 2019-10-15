@@ -29,3 +29,6 @@ git pull
 ## Screenshots
 
 ![alt text](https://raw.githubusercontent.com/frustreermeneer/domoticz-wled-plugin/master/screenshot.jpg)
+
+![alt text](https://raw.githubusercontent.com/frustreermeneer/domoticz-wled-plugin/master/settings.jpg)
+
