@@ -107,8 +107,15 @@ class BasePlugin:
 #                Domoticz.Log( "jsonArray:"+str(jsonArray) )
 
                 if( len( jsonArray ) ):
-                    UpdateEffectsInDomoticz()
-                    UpdatePalettesInDomoticz()
+                    UpdateStatusInDomoticz()
+                    if( self.counter == 0 ):
+                        UpdateEffectsInDomoticz()
+                        UpdatePalettesInDomoticz()
+                    
+            self.counter = self.counter + 1
+
+            if( self.counter >= 10 ):
+                self.counter = 0
 
     def onCommand(self, Unit, Command, Level, Color):
         Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Command '" + str(Command) + "', Level: " + str(Level) + "', Color: " + str(Color) )
@@ -141,6 +148,7 @@ class BasePlugin:
             if( Command == "Set Color" ):		#set kleur en level
                 self.Color = Color;
                 self.Level = Level
+                Domoticz.Log( "color:" + str(self.Color) )
                 parsedColor = json.loads(self.Color)
                 UpdateDevice(3,1,self.Level,self.Color)
                 doWLEDRequest( "/win&FX=0&A="+str(int(self.Level*2.55))+"&R="+str(parsedColor["r"])+"&G="+str(parsedColor["g"])+"&B="+str(parsedColor["b"] ) )
@@ -175,14 +183,9 @@ class BasePlugin:
                 doWLEDRequest( "/win&IX="+str(int(Level*2.55)) )
 
     def onHeartbeat(self):
-        global updateInterval
+#        global updateInterval
 #        Domoticz.Log("onHeartbeat called:" + str(self.counter) ) #+str(len(Devices[2].Options["LevelNames"]))+" - "+str(self.counter))
-
-        self.counter = self.counter + 1
-
-        if( self.counter >= 10 ):
-            self.counter = 0
-            getWLEDStatus()
+        getWLEDStatus()
 
 
 global _plugin
@@ -255,7 +258,7 @@ def UpdateEffectsInDomoticz():
     nValue = Devices[2].nValue;
     sValue = Devices[2].sValue;
     Devices[2].Update(nValue = nValue, sValue = sValue, Options = dictOptions)
-    
+
 #    Domoticz.Log("updateEffectsInDomoticz done!")
 
 def UpdatePalettesInDomoticz():
@@ -291,7 +294,7 @@ def UpdatePresetsInDomoticz():
            LevelNames = LevelNames + "|"
            LevelActions = LevelActions + "|"
 
-    Domoticz.Log( LevelNames )
+#    Domoticz.Log( LevelNames )
 
     dictOptions = Devices[4].Options
     dictOptions["LevelNames"] = LevelNames
@@ -300,6 +303,39 @@ def UpdatePresetsInDomoticz():
     nValue = Devices[4].nValue;
     sValue = Devices[4].sValue;
     Devices[4].Update(nValue = nValue, sValue = sValue, Options = dictOptions)
+
+def UpdateStatusInDomoticz():
+    global jsonArray
+#    Domoticz.Log( str(jsonArray['state']) )
+
+    brightness = jsonArray['state']['bri']
+#    Domoticz.Log( "brightness:" + str(brightness) )
+#    Domoticz.Log( "col:" + str(jsonArray['state']['seg'][0]["col"][0]) )
+    r = int(jsonArray['state']['seg'][0]["col"][0][0])
+    g = int(jsonArray['state']['seg'][0]["col"][0][1])
+    b = int(jsonArray['state']['seg'][0]["col"][0][2])
+    color = json.dumps({ "b":b, "cw":0, "g":g, "m":3, "r":r, "t":0, "ww":0 })
+
+    UpdateDevice(3,1,int(brightness/2.55),color) #Devices[3].sValue)
+
+    preset = jsonArray['state']['ps']
+    if( preset <= 0 ): preset = 0
+#    Domoticz.Log( "preset:" + str(preset) )
+    #UpdateDevice(4,1,int(preset*10)) #not working in 0.8.5 yet
+
+#    Domoticz.Log( "ix:" + str(jsonArray['state']['seg'][0]['ix']) )
+    UpdateDevice(6,1,int(jsonArray['state']['seg'][0]['ix']/2.55))
+
+#    Domoticz.Log( "sx:" + str(jsonArray['state']['seg'][0]['sx']) )
+    UpdateDevice(5,1,int(jsonArray['state']['seg'][0]['sx']/2.55))
+
+#    Domoticz.Log( "fx:" + str(jsonArray['state']['seg'][0]['fx']) )
+    effect = int(jsonArray['state']['seg'][0]['fx'])
+    UpdateDevice(2,1,(effect+1)*10)
+    
+#    Domoticz.Log( "pal:" + str(jsonArray['state']['seg'][0]['pal']) )
+    UpdateDevice(1, 1, (int(jsonArray['state']['seg'][0]['pal'])+1)*10 )
+
 
 def getWLEDStatus():
     getWLEDStatusConn = Domoticz.Connection(Name="getWLEDStatusConn", Transport="TCP/IP", Protocol="HTTP", Address=ipaddress, Port="80" )
