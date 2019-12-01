@@ -10,8 +10,10 @@
         <ul style="list-style-type:square">
             <li>Switching WLED on/off</li>
             <li>Setting brightness</li>
-            <li>Picking a solid color</li>
-            <li>Setting presets from list (not yet)</li>
+            <li>Setting effect from list</li>
+            <li>Setting effect speed & intensity</li>
+            <li>Setting presets from list</li>
+            <li>Setting pallette from list</li>
         </ul>
         <!--h3>Devices</h3>
         <ul style="list-style-type:square">
@@ -20,8 +22,8 @@
         <h3>Configuration</h3>
     </description>
     <params>
-	<param field="Address" label="IP Address" width="200px" required="true" default=""/> The (IP) address of your WLED webserver.
-	<!--param field="UpdateInterval" label="Update interval" width="200px" required="true" default="10"/--> 
+	<param field="Address" label="WLED IP Address" width="200px" required="true" default=""/>
+	<param field="Mode1" label="FX and pallettes update interval (every x*10 secs)" width="200px" required="true" default="6"/>
     </params>
 </plugin>
 """
@@ -38,16 +40,17 @@ class BasePlugin:
     counter = 0
 
     def onStart(self):
-#        Domoticz.Log("onStart called")
         self.counter = 0
         self.Color = {}
         self.Level = 100
 
         global ipaddress
-        #global updateInterval
-        ipaddress = Parameters["Address"].strip()
-        #updateInterval = Parameters["UpdateInterval"].strip()
+        global updateInterval
 
+        ipaddress = Parameters["Address"].strip()
+        updateInterval = int(Parameters["Mode1"].strip())
+
+        
         if (len(Devices) == 0):
             Domoticz.Log("creating devices")
 
@@ -73,8 +76,6 @@ class BasePlugin:
 
     def onConnect(self, Connection, Status, Description):
         global ipaddress
-#        Domoticz.Log("onConnect called")
-#        Domoticz.Log("Name:"+Connection.Name)
  
         # er is een externe verbinding gemaakt
         # json request doen
@@ -91,7 +92,7 @@ class BasePlugin:
 
     def onMessage(self, Connection, Data):
         global jsonArray
-#       Domoticz.Log("onMessage called: "+Connection.Name )
+        global updateInterval
         
         # we krijgen antwoord terug op onze request
         # json update request afhandelen
@@ -104,21 +105,20 @@ class BasePlugin:
                 strData = Data["Data"].decode("utf-8", "ignore")
 
                 jsonArray = json.loads( str(strData) ) 
-#                Domoticz.Log( "jsonArray:"+str(jsonArray) )
 
                 if( len( jsonArray ) ):
                     UpdateStatusInDomoticz()
                     if( self.counter == 0 ):
                         UpdateEffectsInDomoticz()
                         UpdatePalettesInDomoticz()
-                    
+
             self.counter = self.counter + 1
 
-            if( self.counter >= 10 ):
+            if( self.counter >= updateInterval ):
                 self.counter = 0
 
     def onCommand(self, Unit, Command, Level, Color):
-        Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Command '" + str(Command) + "', Level: " + str(Level) + "', Color: " + str(Color) )
+#        Domoticz.Log("onCommand called for Unit " + str(Unit) + ": Command '" + str(Command) + "', Level: " + str(Level) + "', Color: " + str(Color) )
 
         # palettes keuze
         if( Unit == 1 ):
@@ -142,23 +142,23 @@ class BasePlugin:
         if( Unit == 3 ):
             if( Command == "Set Level" ):
                 self.Level = Level if Level < 100 else 100
-                UpdateDevice(3,1,self.Level,self.Color)
+                UpdateDevice(3,1,self.Level) 		#,self.Color)
                 doWLEDRequest( "/win&A="+str(int(self.Level*2.55)) )
 
             if( Command == "Set Color" ):		#set kleur en level
                 self.Color = Color;
                 self.Level = Level
-                Domoticz.Log( "color:" + str(self.Color) )
+                Domoticz.Log( "Color:" + str(self.Color) )
                 parsedColor = json.loads(self.Color)
                 UpdateDevice(3,1,self.Level,self.Color)
                 doWLEDRequest( "/win&FX=0&A="+str(int(self.Level*2.55))+"&R="+str(parsedColor["r"])+"&G="+str(parsedColor["g"])+"&B="+str(parsedColor["b"] ) )
 
             if( Command == "On" ):
-                UpdateDevice(3,1,self.Level,self.Color)
+                UpdateDevice(3,1,self.Level) 		#,self.Color)
                 doWLEDRequest( "/win&T=1&A="+str(int(self.Level*2.55)) )
 
             if( Command == "Off" ):
-                UpdateDevice(3,0, self.Level,self.Color)
+                UpdateDevice(3,0, self.Level) 		#,self.Color)
                 doWLEDRequest( "/win&T=0&A="+str(int(self.Level*2.55)) )
 
         # preset keuze
@@ -183,8 +183,6 @@ class BasePlugin:
                 doWLEDRequest( "/win&IX="+str(int(Level*2.55)) )
 
     def onHeartbeat(self):
-#        global updateInterval
-#        Domoticz.Log("onHeartbeat called:" + str(self.counter) ) #+str(len(Devices[2].Options["LevelNames"]))+" - "+str(self.counter))
         getWLEDStatus()
 
 
@@ -234,12 +232,16 @@ def UpdateDevice(Unit, nValue, sValue, Color=""):
     # Make sure that the Domoticz device still exists (they can be deleted) before updating it.
     if (Unit in Devices):
         if (Devices[Unit].nValue != nValue) or (Devices[Unit].sValue != sValue) or (Devices[Unit].Color != Color):
-            Devices[Unit].Update(nValue=nValue, sValue=str(sValue), Color=str(Color) )
-            #Domoticz.Log("Update "+str(nValue)+":'"+str(sValue)+"' ("+Devices[Unit].Name+")")
+            if( Color ):
+                Devices[Unit].Update(nValue=nValue, sValue=str(sValue), Color=str(Color) )
+            else:
+                Devices[Unit].Update(nValue=nValue, sValue=str(sValue) )
     return
 
 def UpdateEffectsInDomoticz():
     global jsonArray
+
+#    Domoticz.Log("updateEffects")
 
     LevelNames = "Off|"
     LevelActions = "|"
@@ -259,10 +261,10 @@ def UpdateEffectsInDomoticz():
     sValue = Devices[2].sValue;
     Devices[2].Update(nValue = nValue, sValue = sValue, Options = dictOptions)
 
-#    Domoticz.Log("updateEffectsInDomoticz done!")
-
 def UpdatePalettesInDomoticz():
     global jsonArray
+
+#    Domoticz.Log("updatePallettes")
 
     LevelNames = "Off|"
     LevelActions = "|"
@@ -281,10 +283,11 @@ def UpdatePalettesInDomoticz():
     nValue = Devices[1].nValue;
     sValue = Devices[1].sValue;
     Devices[1].Update(nValue = nValue, sValue = sValue, Options = dictOptions)
-    
-#    Domoticz.Log("updatePalettesInDomoticz done!")
+
 
 def UpdatePresetsInDomoticz():
+#    Domoticz.Log("updatePresets")
+
     LevelNames = "None|"
     LevelActions = "|"
 
@@ -306,7 +309,7 @@ def UpdatePresetsInDomoticz():
 
 def UpdateStatusInDomoticz():
     global jsonArray
-#    Domoticz.Log( str(jsonArray['state']) )
+#    Domoticz.Log("updateStatus")
 
     brightness = jsonArray['state']['bri']
 #    Domoticz.Log( "brightness:" + str(brightness) )
