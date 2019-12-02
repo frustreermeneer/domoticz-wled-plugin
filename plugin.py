@@ -13,7 +13,7 @@
             <li>Setting effect from list</li>
             <li>Setting effect speed & intensity</li>
             <li>Setting presets from list</li>
-            <li>Setting pallette from list</li>
+            <li>Setting palette from list</li>
         </ul>
         <!--h3>Devices</h3>
         <ul style="list-style-type:square">
@@ -23,7 +23,7 @@
     </description>
     <params>
 	<param field="Address" label="WLED IP Address" width="200px" required="true" default=""/>
-	<param field="Mode1" label="FX and pallettes update interval (every x*10 secs)" width="200px" required="true" default="6"/>
+	<param field="Mode1" label="FX and palettes update interval (every x*10 secs)" width="200px" required="true" default="6"/>
     </params>
 </plugin>
 """
@@ -34,6 +34,8 @@ import requests
 ipaddress = ""
 jsonArray = None
 getWLEDStatusConn = None
+state = ""
+prevstate = ""
 
 class BasePlugin:
     enabled = True
@@ -93,7 +95,9 @@ class BasePlugin:
     def onMessage(self, Connection, Data):
         global jsonArray
         global updateInterval
-        
+        global state
+        global prevstate
+
         # we krijgen antwoord terug op onze request
         # json update request afhandelen
         if( Connection.Name == "getWLEDStatusConn" ):
@@ -107,10 +111,18 @@ class BasePlugin:
                 jsonArray = json.loads( str(strData) ) 
 
                 if( len( jsonArray ) ):
-                    UpdateStatusInDomoticz()
+                    state = jsonArray['state']
+
+                    # only update Domoticz on changes
+                    if( state != prevstate ):
+                        Domoticz.Log("Updating status")
+                        UpdateStatusInDomoticz()
+                    
                     if( self.counter == 0 ):
                         UpdateEffectsInDomoticz()
                         UpdatePalettesInDomoticz()
+
+                    prevstate = state
 
             self.counter = self.counter + 1
 
@@ -310,6 +322,7 @@ def UpdatePresetsInDomoticz():
 def UpdateStatusInDomoticz():
     global jsonArray
 #    Domoticz.Log("updateStatus")
+#    Domoticz.Log( str(jsonArray['state']) )
 
     brightness = jsonArray['state']['bri']
 #    Domoticz.Log( "brightness:" + str(brightness) )
