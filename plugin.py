@@ -70,7 +70,7 @@ class BasePlugin:
         ipaddress = Parameters["Address"].strip()
         updateInterval = int(Parameters["Mode1"].strip())
 
-        self.UDPConn = Domoticz.Connection(Name="UDPConn", Transport="UDP/IP", Address=ipaddress, Port=str("21324"))
+        self.UDPConn = Domoticz.Connection(Name="UDPConn", Transport="UDP/IP", Address=ipaddress, Port=str(Parameters["Port"]))
         self.UDPConn.Listen()
 
         if (len(Devices) == 0):
