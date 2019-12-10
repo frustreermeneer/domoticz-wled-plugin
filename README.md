@@ -29,8 +29,11 @@ git pull
 
 ## Screenshots
 
+Domoticz switches
 ![Domoticz switches](https://raw.githubusercontent.com/frustreermeneer/domoticz-wled-plugin/master/screenshot.jpg)
 
+Domoticz settings
 ![Domoticz settings](https://raw.githubusercontent.com/frustreermeneer/domoticz-wled-plugin/master/settings.jpg)
 
+WLED sync settings
 ![WLED sync settings](https://raw.githubusercontent.com/frustreermeneer/domoticz-wled-plugin/master/wledsettings.jpg)
