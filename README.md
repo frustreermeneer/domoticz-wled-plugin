@@ -14,6 +14,7 @@ git clone https://github.com/frustreermeneer/domoticz-wled-plugin.git wled
 2. Restart domoticz
 3. Make sure that "Accept new Hardware Devices" is enabled in Domoticz settings
 4. Go to "Hardware" page and add new item with type "WLED"
+5. In WLED -> Sync Interfaces: enable UDP Broadcast and turn on notifications (see screenshot below).
 
 Once plugin is started it will create appropriate domoticz devices. You will find these devices on `Setup -> Devices` page.
 
@@ -32,3 +33,4 @@ git pull
 
 ![alt text](https://raw.githubusercontent.com/frustreermeneer/domoticz-wled-plugin/master/settings.jpg)
 
+![alt text](https://raw.githubusercontent.com/frustreermeneer/domoticz-wled-plugin/master/wledsettings.jpg)
