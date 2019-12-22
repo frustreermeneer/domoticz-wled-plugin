@@ -249,6 +249,7 @@ class BasePlugin:
                 doWLEDRequest( "/win&IX="+str(int(Level*2.55)) )
 
     def onHeartbeat(self):
+        global updateInterval
         self.counter = self.counter + 1
         #Domoticz.Log("counter:" + str(self.counter))
 
