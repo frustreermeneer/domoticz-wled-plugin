@@ -116,7 +116,7 @@ class BasePlugin:
         global jsonArray
         global wledData
         global updateInterval
-        
+
         try:
 
             # we get answer back from our json request
@@ -129,7 +129,8 @@ class BasePlugin:
                 if( Status == 200 ):
                     strData = Data["Data"].decode("utf-8", "ignore")
 
-                    jsonArray = json.loads( str(strData) ) 
+                    if( len( strData ) ):
+                        jsonArray = json.loads( str(strData) ) 
 
                     if( len( jsonArray ) ):
                         # only update Domoticz from JSON on plugin start
@@ -193,7 +194,7 @@ class BasePlugin:
             if( Command == "Set Level" ):
                 doWLEDRequest( "&FP="+str(int(Level/10)-1) )
                 #UpdateDevice(1, 1, Level )
-    
+
         # effect picked
         if( Unit == 2 ):
             if( Command == "Set Level" ):
@@ -208,7 +209,7 @@ class BasePlugin:
         if( Unit == 3 ):
             if( Command == "Set Level" ):
                 self.Level = Level if Level < 100 else 100
-                #UpdateDevice(3,1,self.Level) 		#,self.Color)
+                UpdateDevice(3,1,self.Level) 		#,self.Color)
                 doWLEDRequest( "/win&A="+str(int(self.Level*2.55)) )
 
             if( Command == "Set Color" ):		#set color and level
@@ -216,15 +217,15 @@ class BasePlugin:
                 self.Level = Level
                 Domoticz.Log( "Color:" + str(self.Color) )
                 parsedColor = json.loads(self.Color)
-                #UpdateDevice(3,1,self.Level,self.Color)
+                UpdateDevice(3,1,self.Level,self.Color)
                 doWLEDRequest( "/win&FX=0&A="+str(int(self.Level*2.55))+"&R="+str(parsedColor["r"])+"&G="+str(parsedColor["g"])+"&B="+str(parsedColor["b"] ) )
 
             if( Command == "On" ):
-                #UpdateDevice(3,1,self.Level) 		#,self.Color)
+                UpdateDevice(3,1,self.Level) 		#,self.Color)
                 doWLEDRequest( "/win&T=1&A="+str(int(self.Level*2.55)) )
 
             if( Command == "Off" ):
-                #UpdateDevice(3,0, self.Level) 		#,self.Color)
+                UpdateDevice(3,0, self.Level) 		#,self.Color)
                 doWLEDRequest( "/win&T=0&A="+str(int(self.Level*2.55)) )
 
         # preset picked
@@ -387,9 +388,12 @@ def UpdateStatusInDomoticz():
                                      "r": wledData["red"],
                                      "t": 0,
                                      "ww": 0 })
-
+    
     # brightness and color
-    UpdateDevice(3,1,int(wledData["bri"]/2.55),wledData["color"]) #Devices[3].sValue)
+    if( wledData["bri"] == 0 ):
+        UpdateDevice(3,0,int(wledData["bri"]/2.55),wledData["color"]) #Devices[3].sValue)
+    else:
+        UpdateDevice(3,1,int(wledData["bri"]/2.55),wledData["color"]) #Devices[3].sValue)
 
     # effect Intensity
     UpdateDevice(6,1,int(wledData["effectIntensity"]/2.55))
